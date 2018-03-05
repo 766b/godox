@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	flgKeyword = flag.String("keys", "todo,fix", "Change keyword")
+	flgKeyword = flag.String("keys", "todo,bug,fix", "Change keywords")
 
 	fset *token.FileSet
 

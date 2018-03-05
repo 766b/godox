@@ -11,13 +11,13 @@ Installation
 
 Usage
 ---
-Any comment lines starting with `TODO` or `FIX` (case insensitive) are extracted. If `TODO`/`FIX` comments is longer that 1 line, then only first line will be extracted.
+Any comment lines starting with `TODO` or `FIX` (or other specified keywords, case insensitive) are extracted. If `TODO`/`FIX` comments is longer that 1 line, then only first line will be extracted.
 
     $ godox [<flags>] [<path>...]
 
     $ godox -help
         -keys string
-            Change keyword (default "todo,fix")
+            Change keywords (default "todo,bug,fix")
 
     $ godox ./path/to/directory ./path/to/secondary/directory
     example.go:3:1:TODO: Implement io.Writer interface
