@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"flag"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestParse(t *testing.T) {
@@ -50,7 +48,10 @@ fixtures\03\main.go:15:1:FIX: Mutli line 3
 		t.Run(tt.path, func(t *testing.T) {
 			output := bytes.NewBuffer(nil)
 			new(tt.path, output).parse()
-			assert.Equal(t, tt.result, output.String())
+
+			if tt.result != output.String() {
+				t.Errorf("not equal\nexpected: %s\nactual: %s", tt.result, output.String())
+			}
 		})
 	}
 }

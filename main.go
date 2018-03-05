@@ -19,14 +19,13 @@ var (
 
 	fset *token.FileSet
 
-	keywords []string
+	keywords [][]byte
 	dir      string
 )
 
 type comment struct {
 	c        *ast.Comment
 	b        *bufio.Reader
-	line     int
 	g        *godox
 	tokenPos token.Position
 }
@@ -44,23 +43,24 @@ func (c comment) path() string {
 }
 
 func (c comment) printTodoLines(w io.Writer) {
+	var lineNum int
 	for {
 		line, _, err := c.b.ReadLine()
 		if err != nil {
 			break
 		}
-		sComment := string(bytes.TrimSpace(line))
+		sComment := bytes.TrimSpace(line)
 		if len(sComment) < 4 {
-			c.line++
+			lineNum++
 			continue
 		}
 		for _, kw := range keywords {
-			if strings.EqualFold(kw, string(sComment[0:len(kw)])) {
-				fmt.Fprintf(w, "%s:%d:%d:%s\n", c.path(), c.pos().Line+c.line, c.pos().Column, sComment)
+			if bytes.EqualFold(kw, sComment[0:len(kw)]) {
+				fmt.Fprintf(w, "%s:%d:%d:%s\n", c.path(), c.pos().Line+lineNum, c.pos().Column, sComment)
+				break
 			}
 		}
-
-		c.line++
+		lineNum++
 	}
 	return
 }
@@ -85,7 +85,10 @@ func (g *godox) newComment(c *ast.Comment) comment {
 }
 
 func (g *godox) parse() {
-	keywords = strings.Split(*flgKeyword, ",")
+	for _, k := range strings.Split(*flgKeyword, ",") {
+		keywords = append(keywords, []byte(k))
+	}
+
 	fset = token.NewFileSet()
 	f, err := parser.ParseDir(fset, g.dir, nil, parser.ParseComments)
 	if err != nil {
