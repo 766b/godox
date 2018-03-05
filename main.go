@@ -9,7 +9,6 @@ import (
 	"go/parser"
 	"go/token"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -109,7 +108,7 @@ type godox struct {
 	out io.Writer
 }
 
-func New(dir string, out io.Writer) *godox {
+func new(dir string, out io.Writer) *godox {
 	return &godox{
 		dir,
 		out,
@@ -118,9 +117,8 @@ func New(dir string, out io.Writer) *godox {
 
 func main() {
 	flag.Parse()
-	log.Printf("%+v", os.Args)
 	if len(os.Args) == 1 {
-		New(".", os.Stdout).parse()
+		new(".", os.Stdout).parse()
 		return
 	}
 
@@ -130,7 +128,7 @@ func main() {
 			panic(err)
 		}
 		if fs.IsDir() {
-			New(arg, os.Stdout).parse()
+			new(arg, os.Stdout).parse()
 		}
 	}
 }
