@@ -8,7 +8,7 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"io"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -17,102 +17,88 @@ var (
 	flgKeyword = flag.String("keys", "todo,bug,fix", "Change keywords")
 	fset       *token.FileSet
 	keywords   [][]byte
-	dir        string
 )
 
-type comment struct {
-	c        *ast.Comment
-	b        *bufio.Reader
-	g        *godox
-	tokenPos token.Position
-}
-
-func (c comment) pos() *token.Position {
-	if !c.tokenPos.IsValid() {
-		c.tokenPos = fset.Position(c.c.Pos())
+func newComment(c *ast.Comment) []string {
+	commentText := c.Text
+	switch commentText[1] {
+	case '/':
+		commentText = commentText[2:]
+		if len(commentText) > 0 && commentText[0] == ' ' {
+			commentText = commentText[1:]
+		}
+	case '*':
+		commentText = commentText[2 : len(commentText)-2]
 	}
-	return &c.tokenPos
-}
 
-// path returns the path to the file with keyword
-func (c comment) path() string {
-	path := filepath.Join(c.pos().Filename)
-	return path
-}
+	b := bufio.NewReader(bytes.NewBufferString(commentText))
 
-// printTodoLines prints line where the keyword was found
-func (c comment) printTodoLines(w io.Writer) {
-	var lineNum int
-	for {
-		line, _, err := c.b.ReadLine()
+	var comments []string
+	for lineNum := 0; ; lineNum++ {
+		line, _, err := b.ReadLine()
 		if err != nil {
 			break
 		}
 		sComment := bytes.TrimSpace(line)
 		if len(sComment) < 4 {
-			lineNum++
 			continue
 		}
 		for _, kw := range keywords {
 			if bytes.EqualFold(kw, sComment[0:len(kw)]) {
-				_, _ = fmt.Fprintf(w, "%s:%d:%d:%s\n", c.path(), c.pos().Line+lineNum, c.pos().Column, sComment)
+				pos := fset.Position(c.Pos())
+				comments = append(comments, fmt.Sprintf("%s:%d:%d:%s", filepath.Join(pos.Filename), pos.Line+lineNum, pos.Column, sComment))
 				break
 			}
 		}
-		lineNum++
 	}
-	return
+
+	return comments
 }
 
-func (g *godox) newComment(c *ast.Comment) comment {
-	cT := c.Text
-	switch cT[1] {
-	case '/':
-		cT = cT[2:]
-		if len(cT) > 0 && cT[0] == ' ' {
-			cT = cT[1:]
-		}
-	case '*':
-		cT = cT[2 : len(cT)-2]
-	}
-
-	return comment{
-		c: c,
-		b: bufio.NewReader(bytes.NewBufferString(cT)),
-		g: g,
-	}
-}
-
-func (g *godox) parse() {
+func godox(rootPath string, includeTests bool) ([]string, error) {
 	for _, k := range strings.Split(*flgKeyword, ",") {
 		keywords = append(keywords, []byte(k))
 	}
 
-	fset = token.NewFileSet()
-	f, err := parser.ParseDir(fset, g.dir, nil, parser.ParseComments)
-	if err != nil {
-		panic(err)
+	const recursiveSuffix = string(filepath.Separator) + "..."
+	recursive := false
+	if strings.HasSuffix(rootPath, recursiveSuffix) {
+		recursive = true
+		rootPath = rootPath[:len(rootPath)-len(recursiveSuffix)]
 	}
 
-	for _, pkg := range f {
-		for _, file := range pkg.Files {
-			for _, c := range file.Comments {
-				for _, ci := range c.List {
-					g.newComment(ci).printTodoLines(g.out)
-				}
+	var messages []string
+
+	err := filepath.Walk(rootPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			if !recursive && path != rootPath {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if !strings.HasSuffix(path, ".go") {
+			return nil
+		}
+		if !includeTests && strings.HasSuffix(path, "_test.go") {
+			return nil
+		}
+
+		fset = token.NewFileSet()
+		f, err := parser.ParseFile(fset, path, nil, parser.ParseComments)
+		if err != nil {
+			panic(err)
+		}
+
+		for _, c := range f.Comments {
+			for _, ci := range c.List {
+				messages = append(messages, newComment(ci)...)
 			}
 		}
-	}
-}
+		return nil
+	})
 
-type godox struct {
-	dir string
-	out io.Writer
-}
-
-func newGodox(dir string, out io.Writer) *godox {
-	return &godox{
-		dir,
-		out,
-	}
+	return messages, err
 }
