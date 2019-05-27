@@ -2,7 +2,6 @@ language: go
 
 go:
   - "1.x"
-  - "latest"
 
 script:
   - go test -coverprofile=coverage.txt
