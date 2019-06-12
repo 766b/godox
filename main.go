@@ -125,7 +125,7 @@ func main() {
 		return
 	}
 
-	for _, arg := range os.Args {
+	for _, arg := range flag.Args() {
 		fs, err := os.Stat(arg)
 		if err != nil {
 			panic(err)
