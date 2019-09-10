@@ -7,6 +7,7 @@ import (
 	"go/ast"
 	"go/token"
 	"path/filepath"
+	"strings"
 )
 
 var (
@@ -46,9 +47,12 @@ func getMessages(c *ast.Comment, fset *token.FileSet, keywords []string) []Messa
 		for _, kw := range keywords {
 			if bytes.EqualFold([]byte(kw), sComment[0:len(kw)]) {
 				pos := fset.Position(c.Pos())
+				if len(sComment) > 40 {
+					sComment = []byte(fmt.Sprintf("%s...", sComment[:40]))
+				}
 				comments = append(comments, Message{
 					Pos:     pos,
-					Message: fmt.Sprintf("%s:%d:%d:%s", filepath.Join(pos.Filename), pos.Line+lineNum, pos.Column, sComment),
+					Message: fmt.Sprintf("%s:%d: Line contains %s: \"%s\"", filepath.Join(pos.Filename), pos.Line+lineNum, strings.Join(keywords, "/"), sComment),
 				})
 				break
 			}

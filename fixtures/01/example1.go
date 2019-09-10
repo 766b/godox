@@ -17,7 +17,7 @@ type X struct {
 // This comment is associated with the main function.
 func main() {
 	fmt.Println(hello) // line comment 3
-	//  todo compare apples to oranges (Line 20)
+	//  todo compare apples to oranges on a super super mega mega long long long unsigned line with one big comment (Line 20)
 	// something
 }
 
