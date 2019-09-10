@@ -5,12 +5,12 @@ package main
 import "fmt"
 
 func main() {
-	//FIX: Spelling
+	//FIXME: Spelling
 	fmt.Println("Hello Warld")
 }
 
 /*
 TODO: Multi line 1
 TODO: Multi line 2
-FIX: Mutli line 3
+FIXME: Mutli line 3
 */

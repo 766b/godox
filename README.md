@@ -12,23 +12,4 @@ GoDoX extracts comments from Go code based on keywords.
 Installation
 ---
 
-    go get -u github.com/matoous/godox
-
-Usage
----
-Any comment lines starting with `TODO` or `FIX` (or other specified keywords, case insensitive) are extracted. 
-If `TODO`/`FIX` comments is longer that 1 line, then only first line will be extracted.
-
-    $ godox [<flags>] [<path>...]
-
-    $ godox -h
-        Usage: godox [path] [path] ...
-          -h    Print help
-          -keys string
-                Change keywords (default "todo,bug,fix")
-          -t    Include tests
-
-    $ godox ./path/to/directory ./...
-    example.go:3:1:TODO: Implement io.Writer interface
-    example.go:7:14:TODO: Rename field
-    example.go:15:3:FIX: Something that is broken
+    go get github.com/matoous/godox

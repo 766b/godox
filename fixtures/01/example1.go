@@ -23,4 +23,4 @@ func main() {
 
 //TODO: Multiline C1 (Line 24)
 //TODO: Multiline C2 (Line 25)
-//FIX: Your attitude (Line 26)
+//FIXME: Your attitude (Line 26)
