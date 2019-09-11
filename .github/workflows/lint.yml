@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   revive-lint:
-    name: Lint the project using Revive
+    name: Revive
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the code
@@ -18,7 +18,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   golang-ci-lint:
-    name: Lint the project using GolangCI Lint
+    name: GolangCI
     runs-on: ubuntu-latest
     steps:
       - name: Check out code into the Go module directory
