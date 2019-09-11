@@ -1,5 +1,6 @@
 package addon
 
+//revive:disable
 //TODO: remove foo (Line 3)
 var foo = "Hello World" // line comment 2
 

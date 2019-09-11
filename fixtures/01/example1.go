@@ -3,6 +3,7 @@ package main
 
 import "fmt"
 
+//revive:disable
 // This comment is associated with the hello constant.x
 const hello = "Hello, World!" // line comment 1
 

@@ -1,5 +1,6 @@
 package addon
 
+//revive:disable
 import (
 	"testing"
 )

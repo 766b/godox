@@ -1,5 +1,6 @@
 package main
 
+//revive:disable
 type none struct {
 	Field int //TODO: Add JSON tag (Line 4)
 	//toDO add more fields (Line 5)
